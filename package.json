@@ -3,17 +3,19 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -w",
+    "start": "create-tsproj"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bin": {
-    "snippet": "./index.js"
+    "create-tsproj": "./index.js"
   },
-  "keywords": [],
-  "description": "",
-  "dependencies": {
-    "@babel/polyfill": "^7.0.0",
-    "@types/node": "^10.11.7"
-  }
+  "keywords": [
+    "typescript",
+    "cli",
+    "node"
+  ],
+  "description": "create typescript project, cli tool"
 }
