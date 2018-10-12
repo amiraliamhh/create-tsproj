@@ -2,6 +2,8 @@
 import { exec } from 'child_process';
 import fs from 'fs';
 
+import { createGitIgnore } from './helpers';
+
 const devPackages = [
   "typescript",
   "@babel/core",
@@ -27,7 +29,8 @@ const finalCmd = `
 `;
 
 exec(finalCmd , (err, stdout, stderr) => {
-  setupBuildTasks(getArg('--name') as string)
+  setupBuildTasks(getArg('--name') as string);
+  createGitIgnore('amirali');
   
   console.log(err)
   console.log(stdout)
@@ -64,8 +67,3 @@ function setupBuildTasks(foldername: string): void {
     }
   })
 }
-
-
-import { createGitIgnore } from './helpers';
-
-createGitIgnore('amirali')
