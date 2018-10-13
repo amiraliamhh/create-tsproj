@@ -77,13 +77,14 @@ export function addTslint(foldername: string): Promise<any> {
       if (err) {
         reject(err);
       }
-      
+      fs.readFile(`./${foldername}/tsconfig.json`, (err: Error, data: any) => {
       fs.writeFile(`./${foldername}/tsconfig.json`, JSON.stringify(tsconfigfile, null, 4), 'utf8', (err: Error) => {
         if (err) {
           reject(err);
         } else {
           resolve();
         }
+      })
       })
     })
   })

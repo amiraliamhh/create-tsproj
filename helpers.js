@@ -73,13 +73,15 @@ function addTslint(foldername) {
             if (err) {
                 reject(err);
             }
-            fs_1.default.writeFile(`./${foldername}/tsconfig.json`, JSON.stringify(tsconfigfile, null, 4), 'utf8', (err) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve();
-                }
+            fs_1.default.readFile(`./${foldername}/tsconfig.json`, (err, data) => {
+                fs_1.default.writeFile(`./${foldername}/tsconfig.json`, JSON.stringify(tsconfigfile, null, 4), 'utf8', (err) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve();
+                    }
+                });
             });
         });
     });
