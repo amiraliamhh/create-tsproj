@@ -1,8 +1,14 @@
 #!/usr/bin/env node
-import { exec } from 'child_process';
-import fs from 'fs';
 
-import { createGitIgnore } from './helpers';
+import { exec } from "child_process";
+
+import {
+  createGitIgnore,
+  repoName,
+  setupBuildTasks,
+  addTslint,
+  hasArg
+} from './helpers';
 
 const devPackages = [
   "typescript",
@@ -19,51 +25,34 @@ const commands = {
   npmInit: 'npm init -y',
   installDevPackages: `npm i -D ${devPackages.join(' ')} `,
   tsInit: 'tsc --init --declaration --allowSyntheticDefaultImports --target esnext --outDir dist',
+  makeSrc: 'mkdir src',
+  createSampleIndex: 'cd src && touch index.ts'
 }
 
-const finalCmd = `
-  mkdir ${getArg('--name')} &&
-  cd ${getArg('--name')} &&
-  ${commands.npmInit} && 
-  ${commands.installDevPackages}
-`;
+exec(finalCmd() , (err, stdout, stderr) => {
+  setupBuildTasks(repoName(process.argv) as string);
 
-exec(finalCmd , (err, stdout, stderr) => {
-  setupBuildTasks(getArg('--name') as string);
-  createGitIgnore('amirali');
-  
-  console.log(err)
-  console.log(stdout)
-  console.log(stderr)
-});
-
-function getArg(argName: string): string|Error {
-  const argNameInd: number = process.argv.indexOf(argName);
-  if (argNameInd > -1 && process.argv[argNameInd + 1]) {
-    return process.argv[argNameInd + 1];
+  if (!hasArg('--no-tslint')) {
+    addTslint(repoName(process.argv) as string);
   }
 
-  throw new Error('--name argument must be provided.');
-}
+  if (!hasArg('--no-gitignore')) {
+    createGitIgnore(repoName(process.argv) as string);
+  }
 
-function setupBuildTasks(foldername: string): void {
-  const path = `./${foldername}/package.json`;
-  let tasks = require(path);
-  let scripts = tasks.scripts;
-  const newScripts = Object.assign(scripts, {
-    "type-check": "tsc --noEmit",
-    "type-check:watch": "npm run type-check -- --watch",
-    "build": "npm run build:types && npm run build:js",
-    "build:w": "npm run build:types && npm run build:jsw",
-    "build:types": "tsc --emitDeclarationOnly",
-    "build:js": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline",
-    "build:jsw": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline --watch",
-  });
-  tasks.scripts = newScripts;
+  if (err) {
+    console.error(err);
+  }
 
-  fs.writeFile(path, JSON.stringify(tasks, null, 4), 'utf8', (err: any) => {
-    if (err) {
-      console.log(err);
-    }
-  })
+});
+
+function finalCmd() {
+  const cmdArr = [
+  `mkdir ${repoName(process.argv)}`,
+  `cd ${repoName(process.argv)}`,
+  `${commands.npmInit}`,
+  `${commands.installDevPackages}`
+  ]
+
+  return cmdArr.join(' && ')
 }

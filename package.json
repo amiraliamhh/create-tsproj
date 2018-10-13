@@ -17,5 +17,9 @@
     "cli",
     "node"
   ],
-  "description": "create typescript project, cli tool"
+  "description": "create typescript project, cli tool",
+  "devDependencies": {
+    "@types/node": "^10.11.7"
+  },
+  "dependencies": {}
 }
