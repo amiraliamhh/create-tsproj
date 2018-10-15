@@ -29,7 +29,7 @@ function repoName(args) {
 }
 exports.repoName = repoName;
 function setupBuildTasks(foldername) {
-    const path = `./${foldername}/package.json`;
+    const path = `${process.cwd()}/${foldername}/package.json`;
     let tasks = require(path);
     let scripts = tasks.scripts;
     const newScripts = Object.assign(scripts, {
@@ -68,7 +68,7 @@ exports.hasArg = hasArg;
 function addTslint(foldername) {
     const tslintfile = require('./tslint.json');
     return new Promise((resolve, reject) => {
-        fs_1.default.writeFile(`./${foldername}/tslint.json`, JSON.stringify(tslintfile, null, 4), 'utf8', (err) => {
+        fs_1.default.writeFile(`${process.cwd()}/${foldername}/tslint.json`, JSON.stringify(tslintfile, null, 4), 'utf8', (err) => {
             if (err) {
                 reject(err);
             }
@@ -76,7 +76,7 @@ function addTslint(foldername) {
                 if (err) {
                     console.error(err);
                 }
-                fs_1.default.writeFile(`./${foldername}/tsconfig.json`, data, 'utf8', (err) => {
+                fs_1.default.writeFile(`${process.cwd()}/${foldername}/tsconfig.json`, data, 'utf8', (err) => {
                     if (err) {
                         reject(err);
                     }
