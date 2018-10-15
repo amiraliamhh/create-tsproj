@@ -7,7 +7,7 @@
     "build": "tsc -w",
     "start": "create-tsproj"
   },
-  "author": "",
+  "author": "amirali ameri (amiraliamhh@gmail.com)",
   "license": "MIT",
   "bin": {
     "create-tsproj": "./index.js"
