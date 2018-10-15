@@ -67,14 +67,16 @@ function hasArg(argName) {
 exports.hasArg = hasArg;
 function addTslint(foldername) {
     const tslintfile = require('./tslint.json');
-    const tsconfigfile = require('./tsconfig.json');
     return new Promise((resolve, reject) => {
         fs_1.default.writeFile(`./${foldername}/tslint.json`, JSON.stringify(tslintfile, null, 4), 'utf8', (err) => {
             if (err) {
                 reject(err);
             }
-            fs_1.default.readFile(`./${foldername}/tsconfig.json`, (err, data) => {
-                fs_1.default.writeFile(`./${foldername}/tsconfig.json`, JSON.stringify(tsconfigfile, null, 4), 'utf8', (err) => {
+            fs_1.default.readFile(`${__dirname}/tsconfig.json`, (err, data) => {
+                if (err) {
+                    console.error(err);
+                }
+                fs_1.default.writeFile(`./${foldername}/tsconfig.json`, data, 'utf8', (err) => {
                     if (err) {
                         reject(err);
                     }

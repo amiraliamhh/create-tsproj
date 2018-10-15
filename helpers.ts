@@ -7,7 +7,7 @@ dist
 `
 
 export function createGitIgnore(folderName: string) {
-  fs.writeFile(`./${folderName}/.gitignore`, gitIgnoreContent, 'utf8', (err: Error) {
+  fs.writeFile(`./${folderName}/.gitignore`, gitIgnoreContent, 'utf8', (err: Error) => {
     if (err) {
       throw err;
     }
@@ -71,20 +71,23 @@ export function hasArg(argName: string): boolean {
 
 export function addTslint(foldername: string): Promise<any> {
   const tslintfile = require('./tslint.json');
-  const tsconfigfile = require('./tsconfig.json');
   return new Promise((resolve, reject) => {
     fs.writeFile(`./${foldername}/tslint.json`, JSON.stringify(tslintfile, null, 4), 'utf8', (err: Error) => {
       if (err) {
         reject(err);
       }
-      fs.readFile(`./${foldername}/tsconfig.json`, (err: Error, data: any) => {
-      fs.writeFile(`./${foldername}/tsconfig.json`, JSON.stringify(tsconfigfile, null, 4), 'utf8', (err: Error) => {
+      fs.readFile(`${__dirname}/tsconfig.json`, (err: Error, data: any) => {
         if (err) {
-          reject(err);
-        } else {
-          resolve();
+          console.error(err);
         }
-      })
+
+        fs.writeFile(`./${foldername}/tsconfig.json`, data, 'utf8', (err: Error) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        })
       })
     })
   })
