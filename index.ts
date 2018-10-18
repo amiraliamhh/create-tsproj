@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { exec } from "child_process";
+import { loader } from './msgs';
 
 import {
   createGitIgnore,
@@ -9,6 +10,8 @@ import {
   addTslint,
   hasArg
 } from './helpers';
+
+let loadInterval: any;
 
 const devPackages = [
   "typescript",
@@ -30,23 +33,45 @@ const commands = {
 }
 
 exec(finalCmd() , (err, stdout, stderr) => {
-  setupBuildTasks(repoName(process.argv) as string);
-
-  if (!hasArg('--no-tslint')) {
-    addTslint(repoName(process.argv) as string);
-  }
-
-  if (!hasArg('--no-gitignore')) {
-    createGitIgnore(repoName(process.argv) as string);
-  }
+  clearInterval(loadInterval);
 
   if (err) {
     console.error(err);
+    process.exit();
   }
+
+  loadInterval = loader('creating build tasks');
+  setupBuildTasks(repoName(process.argv) as string)
+  .then(() => {
+    clearInterval(loadInterval);
+
+    if (!hasArg('--no-tslint')) {
+      loadInterval = loader('creating tslint file');
+      addTslint(repoName(process.argv) as string)
+      .then(() => {
+        clearInterval(loadInterval);
+
+      })
+      .catch(console.error);
+    }
+  
+    if (!hasArg('--no-gitignore')) {
+      let loadInt = loader('creating gitignore file');
+      createGitIgnore(repoName(process.argv) as string)
+      .then(() => {
+        clearInterval(loadInt);
+
+      })
+      .catch(console.error);
+    }
+  })
+  .catch(console.error);
 
 });
 
 function finalCmd() {
+  loadInterval = loader('initiating package.json');
+
   const cmdArr = [
   `mkdir ${repoName(process.argv)}`,
   `cd ${repoName(process.argv)}`,

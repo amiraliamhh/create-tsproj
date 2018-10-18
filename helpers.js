@@ -4,14 +4,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const gitIgnoreContent = `node_modules
 dist
 `;
 function createGitIgnore(folderName) {
-    fs_1.default.writeFile(`./${folderName}/.gitignore`, gitIgnoreContent, 'utf8', (err) => {
-        if (err) {
-            throw err;
-        }
+    return new Promise((resolve, reject) => {
+        const p = path_1.default.resolve(__dirname, folderName, '.gitignore');
+        fs_1.default.writeFile(p, gitIgnoreContent, 'utf8', (err) => {
+            if (err) {
+                reject(err);
+            }
+            resolve();
+        });
     });
 }
 exports.createGitIgnore = createGitIgnore;
@@ -29,23 +34,26 @@ function repoName(args) {
 }
 exports.repoName = repoName;
 function setupBuildTasks(foldername) {
-    const path = `${process.cwd()}/${foldername}/package.json`;
-    let tasks = require(path);
-    let scripts = tasks.scripts;
-    const newScripts = Object.assign(scripts, {
-        "type-check": "tsc --noEmit",
-        "type-check:watch": "npm run type-check -- --watch",
-        "build": "npm run build:types && npm run build:js",
-        "build:w": "npm run build:types && npm run build:jsw",
-        "build:types": "tsc --emitDeclarationOnly",
-        "build:js": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline",
-        "build:jsw": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline --watch",
-    });
-    tasks.scripts = newScripts;
-    fs_1.default.writeFile(path, JSON.stringify(tasks, null, 4), 'utf8', (err) => {
-        if (err) {
-            console.log(err);
-        }
+    return new Promise((resolve, reject) => {
+        const p = path_1.default.resolve(process.cwd(), foldername, 'package.json');
+        let tasks = require(p);
+        let scripts = tasks.scripts;
+        const newScripts = Object.assign(scripts, {
+            "type-check": "tsc --noEmit",
+            "type-check:watch": "npm run type-check -- --watch",
+            "build": "npm run build:types && npm run build:js",
+            "build:w": "npm run build:types && npm run build:jsw",
+            "build:types": "tsc --emitDeclarationOnly",
+            "build:js": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline",
+            "build:jsw": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline --watch",
+        });
+        tasks.scripts = newScripts;
+        fs_1.default.writeFile(p, JSON.stringify(tasks, null, 4), 'utf8', (err) => {
+            if (err) {
+                reject(err);
+            }
+            resolve();
+        });
     });
 }
 exports.setupBuildTasks = setupBuildTasks;
@@ -68,15 +76,18 @@ exports.hasArg = hasArg;
 function addTslint(foldername) {
     const tslintfile = require('./tslint.json');
     return new Promise((resolve, reject) => {
-        fs_1.default.writeFile(`${process.cwd()}/${foldername}/tslint.json`, JSON.stringify(tslintfile, null, 4), 'utf8', (err) => {
+        const p = path_1.default.resolve(process.cwd(), foldername, 'tslint.json');
+        fs_1.default.writeFile(p, JSON.stringify(tslintfile, null, 4), 'utf8', (err) => {
             if (err) {
                 reject(err);
             }
-            fs_1.default.readFile(`${__dirname}/tsconfig.json`, (err, data) => {
+            const tsConfP = path_1.default.resolve(__dirname, 'tsconfig.json');
+            fs_1.default.readFile(tsConfP, (err, data) => {
                 if (err) {
                     console.error(err);
                 }
-                fs_1.default.writeFile(`${process.cwd()}/${foldername}/tsconfig.json`, data, 'utf8', (err) => {
+                const tsConfCP = path_1.default.resolve(process.cwd(), foldername, 'tsconfig.json');
+                fs_1.default.writeFile(tsConfCP, data, 'utf8', (err) => {
                     if (err) {
                         reject(err);
                     }
